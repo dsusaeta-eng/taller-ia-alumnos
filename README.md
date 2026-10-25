@@ -16,8 +16,9 @@ No necesitas cuenta de GitHub. El enlace siempre entrega la versión más recien
 
 1. Descomprime el paquete en el **disco local** (por ejemplo en Documentos). No lo pongas en Google Drive, OneDrive, iCloud ni Dropbox.
 2. Descomprime `taller-ia.zip` **al lado de** `mi-taller`, nunca dentro de ella.
-3. Abre `taller-ia/guia_taller.html` con doble clic y sigue la guía. Funciona sin internet.
-4. En VS Code abre **solo** la carpeta `mi-taller`.
+3. Empieza por la guía previa: abre `taller-ia/guia_fundamentos.html` con doble clic. Explica cómo funciona la IA por dentro, con simulaciones para jugar.
+4. Para el taller práctico, abre `taller-ia/guia_taller.html` y síguela paso a paso. Las dos guías funcionan sin internet.
+5. En VS Code abre **solo** la carpeta `mi-taller`.
 
 Necesitas VS Code con la extensión de tu IA, LM Studio con un modelo descargado y el servidor encendido, y Python 3.12 o superior.
 
