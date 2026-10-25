@@ -10,6 +10,8 @@ Material para los alumnos del taller práctico de IA para empresarios: VS Code c
 
 No necesitas cuenta de GitHub. El enlace siempre entrega la versión más reciente.
 
+**El zip pide una clave.** Es la suma de dos partes: la **parte fija** que recibiste al inscribirte y la **parte del día**, que Daniel da en clase. Por ejemplo, `FIJA` + `AB12` se escribe `FIJAAB12`. La parte del día cambia cada medianoche (hora de Ecuador).
+
 ## Cómo empezar
 
 1. Descomprime el paquete en el **disco local** (por ejemplo en Documentos). No lo pongas en Google Drive, OneDrive, iCloud ni Dropbox.

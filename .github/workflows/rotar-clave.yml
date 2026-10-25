@@ -1,0 +1,62 @@
+# Cada medianoche (hora de Ecuador) vuelve a cifrar el material con la clave del día:
+# clave = CLAVE_FIJA (la tienen los alumnos) + código diario calculado con SEMILLA.
+name: Rotar clave diaria
+
+on:
+  schedule:
+    - cron: "0 5 * * *"   # 05:00 UTC = 00:00 en Ecuador (UTC-5)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency: rotar-clave
+
+jobs:
+  rotar:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      SEMILLA: ${{ secrets.SEMILLA }}
+      CLAVE_FIJA: ${{ secrets.CLAVE_FIJA }}
+    steps:
+      - name: Calcular la clave del día
+        run: |
+          export FECHA=$(TZ=America/Guayaquil date +%F)
+          CODIGO=$(python3 - <<'EOF'
+          import hmac, hashlib, os
+          fecha = os.environ["FECHA"]
+          alfabeto = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"
+          d = hmac.new(os.environ["SEMILLA"].encode(), fecha.encode(), hashlib.sha256).digest()
+          print("".join(alfabeto[b % len(alfabeto)] for b in d[:4]))
+          EOF
+          )
+          echo "::add-mask::$CODIGO"
+          echo "::add-mask::$CLAVE_FIJA$CODIGO"
+          echo "FECHA=$FECHA" >> "$GITHUB_ENV"
+          echo "CLAVE=$CLAVE_FIJA$CODIGO" >> "$GITHUB_ENV"
+
+      - name: Descifrar el contenido original
+        run: |
+          gh release download fuente --repo "$GITHUB_REPOSITORY" --pattern contenido.enc
+          openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in contenido.enc -out contenido.zip -pass env:SEMILLA
+          mkdir paquete && cd paquete && unzip -q ../contenido.zip
+
+      - name: Crear el zip con la clave del día
+        run: |
+          cd paquete
+          zip -q -r -P "$CLAVE" ../taller-ia-alumnos.zip .
+          cd ..
+          unzip -tq -P "$CLAVE" taller-ia-alumnos.zip
+
+      - name: Publicar
+        run: |
+          gh release upload v1.0 taller-ia-alumnos.zip --clobber --repo "$GITHUB_REPOSITORY"
+          gh release edit v1.0 --repo "$GITHUB_REPOSITORY" --notes "Material para alumnos del taller. El zip pide una clave: la parte fija que ya tienes + la parte del día que Daniel da en clase.
+
+          Clave vigente desde: $FECHA"
+
+      - name: Mantener activa la rotación
+        # GitHub desactiva las tareas programadas tras 60 días sin actividad en el repositorio
+        run: gh api -X PUT "repos/$GITHUB_REPOSITORY/actions/workflows/rotar-clave.yml/enable"
